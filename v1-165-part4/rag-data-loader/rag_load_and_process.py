@@ -9,8 +9,14 @@ from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
 
+# The pdf-documents folder is found from the location of this file, so the
+# path works on any computer. It also works both when you run this script
+# from the rag-data-loader folder and when the server runs it from the
+# project folder (the "Load and Process PDFs" button).
+PDF_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pdf-documents")
+
 loader = DirectoryLoader(
-    os.path.abspath("/Users/juliocolomer/Documents/000-BOOTCAMP-LLM-APPS/003-NOTEBOOKS/005-RAG-IN-DEPTH/003-RAG-PDFS/167-part4/167-part4/pdf-documents"),
+    os.path.abspath(PDF_DIRECTORY),
     glob="**/*.pdf",
     use_multithreading=True,
     show_progress=True,
@@ -19,7 +25,15 @@ loader = DirectoryLoader(
 )
 docs = loader.load()
 
-embeddings = OpenAIEmbeddings(model='text-embedding-ada-002', )
+# Original version: this script used text-embedding-ada-002. That model still
+# works, but OpenAI now presents text-embedding-3-small as its current small
+# embedding model: it performs a bit better and costs less. Its vectors have
+# the same length (1536). Use the same model as app/rag_chain.py.
+# If you loaded the PDFs before with the old model, run this script again:
+# pre_delete_collection=True replaces the old vectors with the new ones.
+EMBEDDING_MODEL = "text-embedding-3-small"
+
+embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
 
 text_splitter = SemanticChunker(
     embeddings=embeddings
